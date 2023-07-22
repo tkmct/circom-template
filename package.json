@@ -6,9 +6,11 @@
   "scripts": {
     "build": "npm run compile && npm run setup:zkey && npm run setup:verifier",
     "compile": "mkdir -p artifacts; for circuit in circuits/*.circom; do circom $circuit --r1cs --wasm --sym -o artifacts;done",
-    "calc_witness": "node merkle-tree_js/generate_witness.js merkle-tree_js/merkle-tree.wasm input.json witness.wtns",
-    "setup:zkey": "for circuit in artifacts/*.r1cs; do snarkjs groth16 setup $circuit powersOfTau28_hez_final_15.ptau artifacts/zkey/$(basename -- $circuit .r1cs).zkey;done",
-    "setup:verifier": "for zkey in artifacts/zkeys/*.zkey; do snarkjs zkey export solidityverifier $zkey artifacts/verifiers/$(basename -- $zkey .zkey | perl -nE 'say ucfirst').sol;done",
+    "calc_witness": "node artifacts/merkle-tree_js/generate_witness.js artifacts/merkle-tree_js/merkle-tree.wasm input.json artifacts/witness.wtns",
+    "setup:zkey": "mkdir -p artifacts/zkeys; for circuit in artifacts/*.r1cs; do snarkjs groth16 setup $circuit powersOfTau28_hez_final_15.ptau artifacts/zkeys/$(basename -- $circuit .r1cs).zkey;done",
+    "setup:verifier": "mkdir -p artifacts/verifiers; for zkey in artifacts/zkeys/*.zkey; do snarkjs zkey export verificationkey $zkey artifacts/zkeys/vkey.json;done",
+    "prove": "snarkjs groth16 prove artifacts/zkeys/merkle-tree.zkey artifacts/witness.wtns artifacts/proof.json artifacts/public.json",
+    "verify": "snarkjs groth16 verify artifacts/zkeys/vkey.json artifacts/public.json artifacts/proof.json",
     "clean": "rm -rf artifacts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
