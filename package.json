@@ -6,18 +6,25 @@
   "scripts": {
     "build": "npm run compile && npm run setup:zkey && npm run setup:verifier",
     "compile": "mkdir -p artifacts; for circuit in circuits/*.circom; do circom $circuit --r1cs --wasm --sym -o artifacts;done",
-    "calc_witness": "node artifacts/merkle-tree_js/generate_witness.js artifacts/merkle-tree_js/merkle-tree.wasm input.json artifacts/witness.wtns",
+    "calc_witness": "node artifacts/merkle_tree_js/generate_witness.js artifacts/merkle_tree_js/merkle_tree.wasm input.json artifacts/witness.wtns",
     "setup:zkey": "mkdir -p artifacts/zkeys; for circuit in artifacts/*.r1cs; do snarkjs groth16 setup $circuit powersOfTau28_hez_final_15.ptau artifacts/zkeys/$(basename -- $circuit .r1cs).zkey;done",
     "setup:verifier": "mkdir -p artifacts/verifiers; for zkey in artifacts/zkeys/*.zkey; do snarkjs zkey export verificationkey $zkey artifacts/zkeys/vkey.json;done",
-    "prove": "snarkjs groth16 prove artifacts/zkeys/merkle-tree.zkey artifacts/witness.wtns artifacts/proof.json artifacts/public.json",
+    "prove": "snarkjs groth16 prove artifacts/zkeys/merkle_tree.zkey artifacts/witness.wtns artifacts/proof.json artifacts/public.json",
     "verify": "snarkjs groth16 verify artifacts/zkeys/vkey.json artifacts/public.json artifacts/proof.json",
     "clean": "rm -rf artifacts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
     "snarkjs": "^0.7.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "circom_tester": "^0.0.19",
+    "mocha": "^10.2.0"
   }
 }
